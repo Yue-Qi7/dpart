@@ -1,3 +1,12 @@
+"""
+This file is under the following license and copyright.
+MIT License
+Copyright (c) 2022 dpart
+
+The following modifications were made to the file:
+    - The lambda function is replaced by a named function so that the object can be saved with pickle.
+"""
+
 import warnings
 import numpy as np
 import pandas as pd
@@ -74,6 +83,10 @@ class dpart:
     def normalise(self, df: pd.DataFrame) -> pd.DataFrame:
         self.encoders = {}
         df = df.copy()
+
+        def is_numeric(x):
+            return isinstance(x, (np.floating, np.integer, int, float))
+
         for col, series in df.items():
             if series.dtype.kind in "OSb":
                 t_dtype = "category"
@@ -84,16 +97,7 @@ class dpart:
                             PrivacyLeakWarning,
                         )
 
-                    if (
-                        pd.Series(series.unique())
-                        .apply(
-                            lambda x: isinstance(
-                                x, (np.floating, np.integer, int, float)
-                            )
-                        )
-                        .astype(bool)
-                        .all()
-                    ):
+                    if pd.Series(series.unique()).apply(is_numeric).astype(bool).all():
                         self.bounds[col] = {"categories": sorted(list(series.unique()))}
                     else:
                         self.bounds[col] = {
