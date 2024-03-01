@@ -4,7 +4,8 @@ MIT License
 Copyright (c) 2022 dpart
 
 The following modifications were made to the file:
-    - The lambda function is replaced by a named function so that the object can be saved with pickle.
+    - The lambda function was replaced by a named function so that the object can be saved with pickle.
+    - The feature_range of the MinMaxScaler was changed from a list into a tuple to match the type required by sklearn.
 """
 
 import warnings
@@ -115,7 +116,7 @@ class dpart:
                         )
                     self.bounds[col] = {"min": series.min(), "max": series.max()}
                 self.encoders[col] = MinMaxScaler(
-                    feature_range=[self.bounds[col]["min"], self.bounds[col]["max"]]
+                    feature_range=(self.bounds[col]["min"], self.bounds[col]["max"])
                 )
             df[col] = pd.Series(
                 self.encoders[col].fit_transform(df[[col]]).squeeze(),

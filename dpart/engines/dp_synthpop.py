@@ -4,8 +4,8 @@ MIT License
 Copyright (c) 2022 dpart
 
 The following modifications were made to the file:
-    - The differential private synthpop class is modified to include more arguments.
-    - The type hints are updated.
+    - The differential private synthpop class was modified to include more arguments.
+    - The type hints were updated.
 """
 
 from typing import Dict, Union, List
