@@ -196,10 +196,13 @@ class dpart:
             X_columns = [self.root] + self.dep_manager.prediction_matrix.get(target, [])
             logger.info(f"Sample target {target}")
             logger.debug(f"Sample target {target} - preprocess feature matrix")
-            t_X = self.methods[target].preprocess_X(df[X_columns])
+            #### Convert a mix of str and np.str_ to str type ####
+            df_features = df[X_columns]
+            df_features.columns = df_features.columns.astype(str)
+            ######################################################
+            t_X = self.methods[target].preprocess_X(df_features)
             logger.debug(f"Sample target {target} - Sample values")
             t_y = self.methods[target].sample(X=t_X)
-            t_X.columns = t_X.columns.astype(str)
             logger.debug(f"Sample target {target} - post process sampled values")
             y = self.methods[target].postprocess_y(y=t_y)
             logger.debug(f"Sample target {target} - Update feature matrix")
