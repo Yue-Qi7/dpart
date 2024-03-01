@@ -6,6 +6,7 @@ Copyright (c) 2022 dpart
 The following modifications were made to the file:
     - The lambda function was replaced by a named function so that the object can be saved with pickle.
     - The feature_range of the MinMaxScaler was changed from a list into a tuple to match the type required by sklearn.
+    - Bug was fixed by converting the type of the columns to str type when generating synthetic data.
 """
 
 import warnings
@@ -198,6 +199,7 @@ class dpart:
             t_X = self.methods[target].preprocess_X(df[X_columns])
             logger.debug(f"Sample target {target} - Sample values")
             t_y = self.methods[target].sample(X=t_X)
+            t_X.columns = t_X.columns.astype(str)
             logger.debug(f"Sample target {target} - post process sampled values")
             y = self.methods[target].postprocess_y(y=t_y)
             logger.debug(f"Sample target {target} - Update feature matrix")
