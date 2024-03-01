@@ -32,10 +32,7 @@ class ProbabilityTensor(Sampler):
                 self.X_encoders[col].fit(X[col])
 
         X_t = pd.DataFrame(
-            {
-                col: self.X_encoders[col].transform(series)
-                for col, series in X.items()
-            },
+            {col: self.X_encoders[col].transform(series) for col, series in X.items()},
             index=X.index,
             dtype="int64",
         ).reindex(columns=self.X_cols)
@@ -84,7 +81,11 @@ class ProbabilityTensor(Sampler):
 
     def sample(self, X: pd.DataFrame) -> pd.Series:
         if len(self.parents) == 0:
-            y = np.random.choice(self.conditional_dist.shape[-1], p=self.conditional_dist, size=X.shape[0])
+            y = np.random.choice(
+                self.conditional_dist.shape[-1],
+                p=self.conditional_dist,
+                size=X.shape[0],
+            )
         else:
             dists = self.conditional_dist[
                 tuple([tuple(X[parent]) for parent in self.parents])

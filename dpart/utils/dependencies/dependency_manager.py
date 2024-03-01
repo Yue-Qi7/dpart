@@ -6,8 +6,15 @@ from dpart.methods.utils.bin_encoder import BinEncoder
 from dpart.utils.dependencies.selection import select_candidate
 
 
-class DependencyManager():
-    def __init__(self, epsilon: float = None, visit_order=None, prediction_matrix=None, n_bins=20, n_parents=2):
+class DependencyManager:
+    def __init__(
+        self,
+        epsilon: float = None,
+        visit_order=None,
+        prediction_matrix=None,
+        n_bins=20,
+        n_parents=2,
+    ):
         self.encoders = None
         self.n_parents = n_parents
         self.n_bins = n_bins
@@ -43,7 +50,9 @@ class DependencyManager():
             eps = None
         # construct bayesian network
         for i in range(df.shape[1] - 1):
-            selected_parents, selected_child = select_candidate(df=df, parents=visit_order, n_parents=self.n_parents, epsilon=eps)
+            selected_parents, selected_child = select_candidate(
+                df=df, parents=visit_order, n_parents=self.n_parents, epsilon=eps
+            )
             visit_order.append(selected_child)
             prediction_matrix[selected_child] = list(selected_parents)
 
@@ -66,11 +75,10 @@ class DependencyManager():
 
                 if self.n_parents == 0:
                     self.prediction_matrix = {
-                        col: []
-                        for idx, col in enumerate(self.visit_order)
+                        col: [] for idx, col in enumerate(self.visit_order)
                     }
                 elif self.n_parents is not None:
                     self.prediction_matrix = {
-                        col: deps[-self.n_parents:]
+                        col: deps[-self.n_parents :]
                         for col, deps in self.prediction_matrix.items()
                     }

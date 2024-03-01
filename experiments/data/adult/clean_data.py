@@ -41,8 +41,7 @@ def get_bounds(df):
     for col in df:
         col_data = df[col]
         if col_data.dtype.kind in "fui":
-            bounds[col] = {"min": col_data.min(),
-                           "max": col_data.max()}
+            bounds[col] = {"min": col_data.min(), "max": col_data.max()}
         if col_data.dtype.name == "category":
             bounds[col] = {"categories": col_data.unique().to_list()}
 
@@ -50,23 +49,20 @@ def get_bounds(df):
 
 
 # load data
-df = pd.read_csv(path,
-                 sep=r",\s+",
-                 names=columns,
-                 dtype=dtypes,
-                 engine="python")
-test_df = pd.read_csv(test_path,
-                      sep=r",\s+",
-                      names=columns,
-                      dtype=dtypes,
-                      engine="python",
-                      skiprows=1)
+df = pd.read_csv(path, sep=r",\s+", names=columns, dtype=dtypes, engine="python")
+test_df = pd.read_csv(
+    test_path, sep=r",\s+", names=columns, dtype=dtypes, engine="python", skiprows=1
+)
 
 
 # clean test labels
-test_df["income"] = test_df["income"].replace("<=50K.", "<=50K").replace(">50K.", ">50K")
+test_df["income"] = (
+    test_df["income"].replace("<=50K.", "<=50K").replace(">50K.", ">50K")
+)
 # clean dtypes
-test_df["native_country"] = test_df["native_country"].cat.set_categories(df["native_country"].cat.categories)
+test_df["native_country"] = test_df["native_country"].cat.set_categories(
+    df["native_country"].cat.categories
+)
 
 
 # save adult

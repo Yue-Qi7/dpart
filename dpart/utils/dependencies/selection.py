@@ -39,7 +39,10 @@ def entropy(pp):
 def score_candidate(df, parents, child):
     y_pp = (df[parents].groupby(parents, observed=True).size() / df.shape[0]).to_numpy()
     x_pp = df[child].value_counts(normalize=True).to_numpy()
-    xy_pp = (df[parents + [child]].groupby(parents + [child], observed=True).size() / df.shape[0]).to_numpy()
+    xy_pp = (
+        df[parents + [child]].groupby(parents + [child], observed=True).size()
+        / df.shape[0]
+    ).to_numpy()
 
     return entropy(y_pp) + entropy(x_pp) - entropy(xy_pp)
 
@@ -53,13 +56,21 @@ def exponential_mechanism(input_vector, delta):
 
 def select_candidate(df, parents, n_parents=3, epsilon=None):
     n_parents = min(n_parents, len(parents))
-    candidates = [(list(p), child) for p in combinations(parents, n_parents) for child in df.columns if child not in parents]
+    candidates = [
+        (list(p), child)
+        for p in combinations(parents, n_parents)
+        for child in df.columns
+        if child not in parents
+    ]
     scores = [score_candidate(df, parents=p, child=c) for p, c in candidates]
 
     if epsilon is not None:
         sensitivity = mi_sensitivity(df.shape[0])
         delta = sensitivity / epsilon
-        dp_scores = exponential_mechanism(scores, delta=delta, )
+        dp_scores = exponential_mechanism(
+            scores,
+            delta=delta,
+        )
         best_idx = np.random.choice(dp_scores.shape[0], p=dp_scores)
     else:
         best_idx = np.argmax(scores)

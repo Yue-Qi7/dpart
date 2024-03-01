@@ -41,10 +41,7 @@ class RegressorSampler(NumericalSampler):
                 **self.kwargs
             )
         else:
-            self.reg = self.reg_class(
-                *self.args,
-                **self.kwargs
-            )
+            self.reg = self.reg_class(*self.args, **self.kwargs)
         self.reg.fit(X, y)
         # compute sigma
         y_pred = self.reg.predict(X)
@@ -59,7 +56,7 @@ class RegressorSampler(NumericalSampler):
             additive_noise = 0
 
         self.sigma = np.abs(
-            np.sqrt(np.sum(residuals ** 2) / normaliser) + additive_noise
+            np.sqrt(np.sum(residuals**2) / normaliser) + additive_noise
         )
 
     def postprocess_y(self, y: pd.Series) -> pd.Series:

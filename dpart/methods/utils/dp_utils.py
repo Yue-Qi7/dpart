@@ -2,7 +2,9 @@ import numpy as np
 
 
 def laplace_mechanism(
-    counts: np.ndarray, sensitivity: float, epsilon: float,
+    counts: np.ndarray,
+    sensitivity: float,
+    epsilon: float,
 ) -> np.ndarray:
     r"""
     Apply laplace mechanism to provided counts

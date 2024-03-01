@@ -23,10 +23,11 @@ logger = getLogger("dpart")
 logger.setLevel("WARN")
 
 
-engines = {"PrivBayes": PrivBayes,
-           "dp-synthpop": DPsynthpop,
-           "Independent": Independent
-           }
+engines = {
+    "PrivBayes": PrivBayes,
+    "dp-synthpop": DPsynthpop,
+    "Independent": Independent,
+}
 # Data Settings
 LABEL = "income"
 
@@ -52,7 +53,7 @@ def evaluate(train, test):
     encoder = SklearnEncoder(mode="ordinal")
     t_data = encoder.fit_transform(full_data)
 
-    t_train, t_test = (t_data.iloc[: train.shape[0]], t_data.iloc[train.shape[0]:])
+    t_train, t_test = (t_data.iloc[: train.shape[0]], t_data.iloc[train.shape[0] :])
     # fit model
     clf = CLF()
     clf.fit(t_train.drop(LABEL, axis=1), t_train[LABEL])
@@ -90,23 +91,46 @@ def similarity(real, synth, n_bins=100):
     for col, series in full_df.items():
         encoder = BinEncoder(n_bins=n_bins)
         t_series = encoder.fit_transform(series)
-        t_real, t_synth = t_series.iloc[:real.shape[0]], t_series.iloc[real.shape[0]:]
+        t_real, t_synth = t_series.iloc[: real.shape[0]], t_series.iloc[real.shape[0] :]
 
-        score = pd.DataFrame({"real": t_real.value_counts(normalize=True), "synth": t_synth.value_counts(normalize=True)}).fillna(0).min(axis=1).sum()
+        score = (
+            pd.DataFrame(
+                {
+                    "real": t_real.value_counts(normalize=True),
+                    "synth": t_synth.value_counts(normalize=True),
+                }
+            )
+            .fillna(0)
+            .min(axis=1)
+            .sum()
+        )
         scores.append(score)
     return np.mean(scores)
 
 
 if __name__ == "__main__":
     results = []
-    train_df, test_df, bounds = get_data(
-    )
+    train_df, test_df, bounds = get_data()
 
     low_results = low_baseline(train_df, test_df)
-    low_results.update({"exp_idx": "low_baseline", "epsilon": None, "gen_idx": "source", "engine": None})
+    low_results.update(
+        {
+            "exp_idx": "low_baseline",
+            "epsilon": None,
+            "gen_idx": "source",
+            "engine": None,
+        }
+    )
 
     source_results = evaluate(train_df, test_df)
-    source_results.update({"exp_idx": "high_baseline", "epsilon": None, "gen_idx": "source", "engine": None})
+    source_results.update(
+        {
+            "exp_idx": "high_baseline",
+            "epsilon": None,
+            "gen_idx": "source",
+            "engine": None,
+        }
+    )
 
     results += [source_results, low_results]
     with warnings.catch_warnings():
@@ -116,16 +140,17 @@ if __name__ == "__main__":
             ebar.set_description(f"engine : {engine_name}")
             pbar = tqdm(list(EPSILONS), desc="epsilon: ", leave=False)
             for epsilon in pbar:
-                for exp_idx in tqdm(range(N_TRAIN), desc="train iteration: ", leave=False):
-                    dpart_model = engine(
-                        epsilon=epsilon,
-                        bounds=bounds
-                    )
+                for exp_idx in tqdm(
+                    range(N_TRAIN), desc="train iteration: ", leave=False
+                ):
+                    dpart_model = engine(epsilon=epsilon, bounds=bounds)
                     dpart_model.fit(train_df)
 
                     pbar.set_description(f"epsilon: {dpart_model.epsilon:.3f}")
 
-                    for gen_idx in tqdm(range(N_GEN), desc="gen iteration: ", leave=False):
+                    for gen_idx in tqdm(
+                        range(N_GEN), desc="gen iteration: ", leave=False
+                    ):
                         exp_results = {
                             "engine": engine_name,
                             "exp_idx": exp_idx,

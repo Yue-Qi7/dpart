@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.preprocessing import KBinsDiscretizer, OrdinalEncoder
 
 
-class BinEncoder():
+class BinEncoder:
     def __init__(self, n_bins=20):
         self.n_bins = 20
         self.encoder = None
@@ -19,7 +19,12 @@ class BinEncoder():
         self.encoder.fit(data.to_frame())
 
     def transform(self, data: pd.Series) -> pd.Series:
-        return pd.Series(self.encoder.transform(data.to_frame()).squeeze(), index=data.index, name=data.name, dtype="int64")
+        return pd.Series(
+            self.encoder.transform(data.to_frame()).squeeze(),
+            index=data.index,
+            name=data.name,
+            dtype="int64",
+        )
 
     def fit_transform(self, data: pd.Series) -> pd.Series:
         self.fit(data)

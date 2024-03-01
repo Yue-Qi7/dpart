@@ -19,7 +19,9 @@ def DS_baseline(train_df, bounds, epsilon):
     threshold_value = 20
 
     # specify categorical attributes
-    categorical_attributes = {col: True for col, series in train_df.items() if series.dtype.name == "category"}
+    categorical_attributes = {
+        col: True for col, series in train_df.items() if series.dtype.name == "category"
+    }
     # specify which attributes are candidate keys of input dataset.
 
     # A parameter in Differential Privacy. It roughly means that removing a row in the input dataset will not
@@ -36,15 +38,19 @@ def DS_baseline(train_df, bounds, epsilon):
         train_df.to_csv(input_file, index=False)
         start_time = time()
         describer = DataDescriber(category_threshold=threshold_value)
-        describer.describe_dataset_in_correlated_attribute_mode(dataset_file=input_file,
-                                                                epsilon=epsilon,
-                                                                k=degree_of_bayesian_network,
-                                                                attribute_to_is_categorical=categorical_attributes)
+        describer.describe_dataset_in_correlated_attribute_mode(
+            dataset_file=input_file,
+            epsilon=epsilon,
+            k=degree_of_bayesian_network,
+            attribute_to_is_categorical=categorical_attributes,
+        )
 
         describer.save_dataset_description_to_file(model_file)
         train_time = time()
         generator = DataGenerator()
-        _ = generator.generate_dataset_in_correlated_attribute_mode(train_df.shape[0], model_file)
+        _ = generator.generate_dataset_in_correlated_attribute_mode(
+            train_df.shape[0], model_file
+        )
         gen_time = time()
 
     return train_time - start_time, gen_time - train_time
@@ -68,6 +74,8 @@ if __name__ == "__main__":
     for idx in tqdm(range(n_exp)):
         for b_name, baseline in tqdm(to_test.items(), leave=False):
             train_time, gen_time = baseline(train_df=train_df, bounds=bounds, epsilon=1)
-            results.append({"baseline": b_name, "idx": idx, "train": train_time, "gen": gen_time})
+            results.append(
+                {"baseline": b_name, "idx": idx, "train": train_time, "gen": gen_time}
+            )
 
     pd.DataFrame(results).to_csv("data/speed_results.csv", index=False)
