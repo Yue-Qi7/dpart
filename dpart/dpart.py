@@ -7,19 +7,20 @@ The following modifications were made to the file:
     - The lambda function was replaced by a named function so that the object can be saved with pickle.
     - The feature_range of the MinMaxScaler was changed from a list into a tuple to match the type required by sklearn.
     - Bug was fixed by converting the type of the columns to str type when generating synthetic data.
+    - The privacy budget accountant was implemented to track privacy spend.
 """
 
 import warnings
 import numpy as np
 import pandas as pd
 from logging import getLogger
-from typing import Union, Dict
-from collections import defaultdict
+from typing import Union
 from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler
+from diffprivlib import BudgetAccountant
 from diffprivlib.utils import PrivacyLeakWarning
 
 from dpart.utils.dependencies import DependencyManager
-from dpart.methods import ProbabilityTensor
+from dpart.methods import ProbabilityTensor, LinearRegression
 
 
 logger = getLogger("dpart")
@@ -37,13 +38,14 @@ class dpart:
         # privacy settings
         epsilon: Union[dict, float] = None,
         bounds: dict = None,
+        slack: float = 0.0,
         # dependencies
         dependency_manager=None,
         visit_order: list = None,
         prediction_matrix: dict = None,
-        n_parents=2,
+        n_parents=None,
     ):
-        # Privact budget
+        # Private budget
         if epsilon is not None:
             if not isinstance(epsilon, dict):
                 if prediction_matrix == "infer":
@@ -53,6 +55,7 @@ class dpart:
         else:
             epsilon = {"dependency": None, "methods": {}}
         self._epsilon = epsilon
+        self.slack = slack
         self.dep_manager = DependencyManager(
             epsilon=self._epsilon.get("dependency", None),
             visit_order=visit_order,
@@ -151,6 +154,14 @@ class dpart:
         t_df = self.normalise(df)
         t_df.insert(0, column=self.root, value=0)
 
+        # initiate budget accountant
+        if self._epsilon.get("dependency", None) in [None, 0]:
+            spent_budget = None
+        else:
+            spent_budget = [(self._epsilon["dependency"], 0)]
+        self.budget_acc = BudgetAccountant(slack=self.slack, spent_budget=spent_budget)
+        self.budget_acc.set_default()
+
         # build methods
         for idx, target in enumerate(self.dep_manager.visit_order):
             X_columns = [self.root] + self.dep_manager.prediction_matrix.get(target, [])
@@ -171,6 +182,12 @@ class dpart:
 
             if self._epsilon["methods"].get(target, None) is not None:
                 self.methods[target].set_epsilon(self._epsilon["methods"][target])
+
+                # update the budget spent, if the method is linear regression
+                if isinstance(self.methods[target], LinearRegression):
+                    self.budget_acc.spend(
+                        epsilon=self._epsilon["methods"][target] / 2, delta=0
+                    )
 
             logger.info(
                 f"Fit target: {target} | sampler used: {self.methods[target].__class__.__name__}"
