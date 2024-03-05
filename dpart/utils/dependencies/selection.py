@@ -42,7 +42,7 @@ def mi_sensitivity(n_rows):
 
 
 def entropy(pp):
-    -np.sum([0 if p == 0 else p * np.log2(p) for p in pp])
+    return -np.sum([0 if p == 0 else p * np.log2(p) for p in pp])
 
 
 def score_candidate(df, parents, child):
