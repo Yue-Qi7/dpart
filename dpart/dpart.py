@@ -8,6 +8,7 @@ The following modifications were made to the file:
     - The feature_range of the MinMaxScaler was changed from a list into a tuple to match the type required by sklearn.
     - Bug was fixed by converting the type of the columns to str type when generating synthetic data.
     - The privacy budget accountant was implemented to track privacy spend.
+    - Maximum number of iterations was added to fix the convergence issue.
 """
 
 import warnings
@@ -20,7 +21,7 @@ from diffprivlib import BudgetAccountant
 from diffprivlib.utils import PrivacyLeakWarning
 
 from dpart.utils.dependencies import DependencyManager
-from dpart.methods import ProbabilityTensor, LinearRegression
+from dpart.methods import ProbabilityTensor, LinearRegression, LogisticRegression
 
 
 logger = getLogger("dpart")
@@ -133,7 +134,10 @@ class dpart:
 
     def default_method(self, dtype):
         if dtype.kind in "OSb":
-            return self.default_categorical()
+            if self.default_categorical == LogisticRegression:
+                return self.default_categorical(max_iter=10000)
+            else:
+                return self.default_categorical()
         return self.default_numerical()
 
     def fit(self, df: pd.DataFrame):
