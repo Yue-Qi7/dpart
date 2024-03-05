@@ -1,3 +1,12 @@
+"""
+This file is under the following license and copyright.
+MIT License
+Copyright (c) 2022 dpart
+
+The following modifications were made to the file:
+    - The entropy was set to its one-sided limitation when the probability is 0 to avoid returning NA.
+"""
+
 import numpy as np
 from itertools import combinations
 from scipy.special import logsumexp
@@ -33,7 +42,7 @@ def mi_sensitivity(n_rows):
 
 
 def entropy(pp):
-    return -np.sum(pp * np.log2(pp))
+    -np.sum([0 if p == 0 else p * np.log2(p) for p in pp])
 
 
 def score_candidate(df, parents, child):
